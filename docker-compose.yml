@@ -1,0 +1,39 @@
+services:
+  juice-shop:
+    image: bkimminich/juice-shop:v17.1.1
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 10s
+    networks:
+      - lab
+
+  zap:
+    image: zaproxy/zap-stable:2.15.0
+    user: root
+    depends_on:
+      juice-shop:
+        condition: service_healthy
+    volumes:
+      - ./reports:/zap/wrk/reports:rw
+    networks:
+      - lab
+    command:
+      - "zap-baseline.py"
+      - "-t"
+      - "http://juice-shop:3000"
+      - "-r"
+      - "/zap/wrk/reports/zap-report.html"
+      - "-J"
+      - "/zap/wrk/reports/zap-report.json"
+      - "-w"
+      - "/zap/wrk/reports/zap-report.md"
+      - "-I"
+    restart: "no"
+
+networks:
+  lab:

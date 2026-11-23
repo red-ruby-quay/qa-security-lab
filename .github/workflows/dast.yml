@@ -1,0 +1,35 @@
+name: DAST Baseline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose file
+        run: docker compose config >/dev/null
+
+      - name: Run ZAP baseline
+        run: docker compose run --rm zap || true
+
+      - name: Verify report
+        run: test -s reports/zap-report.html
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: reports/
+          retention-days: 7
+
+      - name: Stop lab
+        if: always()
+        run: docker compose down -v
