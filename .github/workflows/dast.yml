@@ -17,7 +17,7 @@ jobs:
         run: docker compose config >/dev/null
 
       - name: Run ZAP baseline
-        run: docker compose run --rm zap || true
+        run: ./scripts/run-scan.sh
 
       - name: Verify report
         run: test -s reports/zap-report.html

@@ -69,7 +69,7 @@ Treat every alert as a hypothesis and verify it manually before reporting it as 
 `.github/workflows/dast.yml` runs on every push and pull request:
 
 1. validates the Compose file;
-2. starts Juice Shop and waits for its health check;
+2. starts Juice Shop and waits until port 3000 accepts connections;
 3. runs the ZAP baseline;
 4. verifies that a report was produced;
 5. uploads the report as a workflow artifact;
